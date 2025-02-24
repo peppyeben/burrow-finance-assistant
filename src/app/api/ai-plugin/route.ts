@@ -19,15 +19,19 @@ export async function GET() {
             assistant: {
                 name: "Burrow Finance Assistant",
                 description:
-                    "An assistant that answers with blockchain information, tells the user's account id, interacts with twitter, creates transaction payloads for NEAR and EVM blockchains, and flips coins.",
-                instructions: `You create near and evm transactions, give blockchain information, tell the user's account id, interact with twitter and flip coins. For blockchain transactions, first generate a transaction payload using the appropriate endpoint (/api/tools/create-near-transaction or /api/tools/create-evm-transaction), then explicitly use the 'generate-transaction' tool for NEAR or 'generate-evm-tx' tool for EVM to actually send the transaction on the client side. For EVM transactions, make sure to provide the 'to' address (recipient) and 'amount' (in ETH) parameters when calling /api/tools/create-evm-transaction. Simply getting the payload from the endpoints is not enough - the corresponding tool must be used to execute the transaction.
+                    "An assistant specialized in Burrow Finance, providing key functionalities such as supplying and borrowing assets, managing collateral. It can display the user's Burrow account details, including supplied assets, borrowed amounts, collateral status, and health factor. Additionally, it generates transaction payloads for supplying, borrowing, repaying, withdrawing on NEAR to help users stay informed about their positions.",
+                instructions: `
                 You get supported tokens on Burrow.finance using the /api/tools/get-supported-tokens path. When you get the tokens, display it in a well aesthetic table-like format.
-                To supply tokens, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10 ** 6, for most tokens, the decimal is 18) to the /api/tools/supply-asset path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for., 
+                To supply tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/supply-asset path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
+                To borrow tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/borrow-asset path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
+                To withdraw tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/withdraw-asset path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
+                To repay loans, you must explicitly require the 'token' and 'amount' as compulsory parameters and where to repay from 'fromSupply' as an optional parameter (if not specified, 'fromSupply' will be false, if specified, it'll be true), you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/repay-loan path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
+                To increase collateral of tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/increase-collateral path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
+                To decrease collateral of tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/decrease-collateral path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
                 `,
                 tools: [
                     { type: "generate-transaction" },
                     { type: "generate-evm-tx" },
-                    { type: "sign-message" },
                 ],
             },
         },
@@ -83,6 +87,570 @@ export async function GET() {
                                 type: "string",
                             },
                             description: "The amount of token/asset to supply",
+                        },
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            transactionPayload: {
+                                                type: "object",
+                                                properties: {
+                                                    receiverId: {
+                                                        type: "string",
+                                                        description:
+                                                            "The receiver's NEAR account ID",
+                                                    },
+                                                    actions: {
+                                                        type: "array",
+                                                        items: {
+                                                            type: "object",
+                                                            properties: {
+                                                                type: {
+                                                                    type: "string",
+                                                                    description:
+                                                                        "The type of action (e.g., 'Transfer')",
+                                                                },
+                                                                params: {
+                                                                    type: "object",
+                                                                    properties:
+                                                                        {
+                                                                            deposit:
+                                                                                {
+                                                                                    type: "string",
+                                                                                    description:
+                                                                                        "The amount to transfer in yoctoNEAR",
+                                                                                },
+                                                                        },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "400": {
+                            description: "Bad request",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "500": {
+                            description: "Error response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "/api/tools/borrow-asset": {
+                get: {
+                    operationId: "borrowAsset",
+                    summary:
+                        "Create a NEAR transaction payload for borrowing asset from Burrow",
+                    description:
+                        "Generates a NEAR transaction payload for borrowing assets from Burrow with the generate-transaction tool",
+                    parameters: [
+                        {
+                            name: "token",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The token/asset to be borrowed",
+                        },
+                        {
+                            name: "amount",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The amount of token/asset to borrow",
+                        },
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            transactionPayload: {
+                                                type: "object",
+                                                properties: {
+                                                    receiverId: {
+                                                        type: "string",
+                                                        description:
+                                                            "The receiver's NEAR account ID",
+                                                    },
+                                                    actions: {
+                                                        type: "array",
+                                                        items: {
+                                                            type: "object",
+                                                            properties: {
+                                                                type: {
+                                                                    type: "string",
+                                                                    description:
+                                                                        "The type of action (e.g., 'Transfer')",
+                                                                },
+                                                                params: {
+                                                                    type: "object",
+                                                                    properties:
+                                                                        {
+                                                                            deposit:
+                                                                                {
+                                                                                    type: "string",
+                                                                                    description:
+                                                                                        "The amount to transfer in yoctoNEAR",
+                                                                                },
+                                                                        },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "400": {
+                            description: "Bad request",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "500": {
+                            description: "Error response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "/api/tools/withdraw-asset": {
+                get: {
+                    operationId: "withdrawAsset",
+                    summary:
+                        "Create a NEAR transaction payload for withdrawing asset from Burrow",
+                    description:
+                        "Generates a NEAR transaction payload for withdrawing assets from Burrow with the generate-transaction tool",
+                    parameters: [
+                        {
+                            name: "token",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The token/asset to be withdrawn",
+                        },
+                        {
+                            name: "amount",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description:
+                                "The amount of token/asset to withdrawn",
+                        },
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            transactionPayload: {
+                                                type: "object",
+                                                properties: {
+                                                    receiverId: {
+                                                        type: "string",
+                                                        description:
+                                                            "The receiver's NEAR account ID",
+                                                    },
+                                                    actions: {
+                                                        type: "array",
+                                                        items: {
+                                                            type: "object",
+                                                            properties: {
+                                                                type: {
+                                                                    type: "string",
+                                                                    description:
+                                                                        "The type of action (e.g., 'Transfer')",
+                                                                },
+                                                                params: {
+                                                                    type: "object",
+                                                                    properties:
+                                                                        {
+                                                                            deposit:
+                                                                                {
+                                                                                    type: "string",
+                                                                                    description:
+                                                                                        "The amount to transfer in yoctoNEAR",
+                                                                                },
+                                                                        },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "400": {
+                            description: "Bad request",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "500": {
+                            description: "Error response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "/api/tools/repay-loan": {
+                get: {
+                    operationId: "repayLoan",
+                    summary:
+                        "Create a NEAR transaction payload for repaying a borrowed loan from Burrow",
+                    description:
+                        "Generates a NEAR transaction payload for repaying borrowed loans from Burrow with the generate-transaction tool",
+                    parameters: [
+                        {
+                            name: "token",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The token/asset to repay.",
+                        },
+                        {
+                            name: "amount",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The amount of token/asset to repay",
+                        },
+                        {
+                            name: "fromSupply",
+                            in: "query",
+                            required: false,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "Source of loan repayment",
+                        },
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            transactionPayload: {
+                                                type: "object",
+                                                properties: {
+                                                    receiverId: {
+                                                        type: "string",
+                                                        description:
+                                                            "The receiver's NEAR account ID",
+                                                    },
+                                                    actions: {
+                                                        type: "array",
+                                                        items: {
+                                                            type: "object",
+                                                            properties: {
+                                                                type: {
+                                                                    type: "string",
+                                                                    description:
+                                                                        "The type of action (e.g., 'Transfer')",
+                                                                },
+                                                                params: {
+                                                                    type: "object",
+                                                                    properties:
+                                                                        {
+                                                                            deposit:
+                                                                                {
+                                                                                    type: "string",
+                                                                                    description:
+                                                                                        "The amount to transfer in yoctoNEAR",
+                                                                                },
+                                                                        },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "400": {
+                            description: "Bad request",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "500": {
+                            description: "Error response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "/api/tools/increase-collateral": {
+                get: {
+                    operationId: "increaseCollateral",
+                    summary:
+                        "Create a NEAR transaction payload for increasing token/asset collateral on Burrow",
+                    description:
+                        "Generates a NEAR transaction payload for increasing token/asset collateral on Burrow with the generate-transaction tool",
+                    parameters: [
+                        {
+                            name: "token",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description:
+                                "The token/asset collateral to be increased.",
+                        },
+                        {
+                            name: "amount",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description:
+                                "The amount of token/asset to increase by.",
+                        },
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            transactionPayload: {
+                                                type: "object",
+                                                properties: {
+                                                    receiverId: {
+                                                        type: "string",
+                                                        description:
+                                                            "The receiver's NEAR account ID",
+                                                    },
+                                                    actions: {
+                                                        type: "array",
+                                                        items: {
+                                                            type: "object",
+                                                            properties: {
+                                                                type: {
+                                                                    type: "string",
+                                                                    description:
+                                                                        "The type of action (e.g., 'Transfer')",
+                                                                },
+                                                                params: {
+                                                                    type: "object",
+                                                                    properties:
+                                                                        {
+                                                                            deposit:
+                                                                                {
+                                                                                    type: "string",
+                                                                                    description:
+                                                                                        "The amount to transfer in yoctoNEAR",
+                                                                                },
+                                                                        },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "400": {
+                            description: "Bad request",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "500": {
+                            description: "Error response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "/api/tools/decrease-collateral": {
+                get: {
+                    operationId: "decreaseCollateral",
+                    summary:
+                        "Create a NEAR transaction payload for decreasing token/asset collateral on Burrow",
+                    description:
+                        "Generates a NEAR transaction payload for decreasing token/asset collateral on Burrow with the generate-transaction tool",
+                    parameters: [
+                        {
+                            name: "token",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description:
+                                "The token/asset collateral to be decreased.",
+                        },
+                        {
+                            name: "amount",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description:
+                                "The amount of token/asset to decrease by.",
                         },
                     ],
                     responses: {
@@ -383,149 +951,6 @@ export async function GET() {
                                             error: {
                                                 type: "string",
                                                 description: "Error message",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        "500": {
-                            description: "Error response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            "/api/tools/create-evm-transaction": {
-                get: {
-                    operationId: "createEvmTransaction",
-                    summary: "Create EVM transaction",
-                    description:
-                        "Generate an EVM transaction payload with specified recipient and amount to be used directly in the generate-evm-tx tool",
-                    parameters: [
-                        {
-                            name: "to",
-                            in: "query",
-                            required: true,
-                            schema: {
-                                type: "string",
-                            },
-                            description: "The EVM address of the recipient",
-                        },
-                        {
-                            name: "amount",
-                            in: "query",
-                            required: true,
-                            schema: {
-                                type: "string",
-                            },
-                            description: "The amount of ETH to transfer",
-                        },
-                    ],
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            evmSignRequest: {
-                                                type: "object",
-                                                properties: {
-                                                    to: {
-                                                        type: "string",
-                                                        description:
-                                                            "Receiver address",
-                                                    },
-                                                    value: {
-                                                        type: "string",
-                                                        description:
-                                                            "Transaction value",
-                                                    },
-                                                    data: {
-                                                        type: "string",
-                                                        description:
-                                                            "Transaction data",
-                                                    },
-                                                    from: {
-                                                        type: "string",
-                                                        description:
-                                                            "Sender address",
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        "400": {
-                            description: "Bad request",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        "500": {
-                            description: "Server error",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            "/api/tools/coinflip": {
-                get: {
-                    summary: "Coin flip",
-                    description:
-                        "Flip a coin and return the result (heads or tails)",
-                    operationId: "coinFlip",
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            result: {
-                                                type: "string",
-                                                description:
-                                                    "The result of the coin flip (heads or tails)",
-                                                enum: ["heads", "tails"],
                                             },
                                         },
                                     },
