@@ -32,8 +32,6 @@ export const getSupportedBurrowTokens = async () => {
             supply_apy: data.supply_apy,
         }));
 
-        console.log(tokens);
-
         return tokens;
     } catch (error) {
         throw error;

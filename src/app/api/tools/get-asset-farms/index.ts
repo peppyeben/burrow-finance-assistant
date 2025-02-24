@@ -29,8 +29,6 @@ export const getAssetFarms = async () => {
             (data: any) => Object.keys(data[1].rewards).length > 0
         );
 
-        console.log(assets);
-
         return assets;
     } catch (error) {
         throw error;

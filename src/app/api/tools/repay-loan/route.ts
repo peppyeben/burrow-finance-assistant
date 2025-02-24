@@ -17,9 +17,6 @@ export async function GET(request: Request) {
 
         const preTX = await repayLoan(token, amount, fromSupply);
 
-        console.log(preTX);
-        console.log(preTX.data);
-
         const transactionPayload = {
             receiverId: preTX.data.contract_id,
             actions: [

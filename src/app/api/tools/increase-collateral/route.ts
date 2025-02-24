@@ -14,13 +14,7 @@ export async function GET(request: Request) {
             );
         }
 
-        console.log("Token: ", token);
-        console.log("Amount: ", amount);
-
         const preTX = await increaseCollateral(token, amount);
-
-        console.log(preTX);
-        console.log(preTX.data);
 
         const transactionPayload = {
             receiverId: preTX.data.contract_id,
