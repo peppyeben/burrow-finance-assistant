@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { supplyAsset } from ".";
 
 export async function GET(request: Request) {
