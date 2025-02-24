@@ -22,6 +22,8 @@ export async function GET() {
                     "An assistant specialized in Burrow Finance, providing key functionalities such as supplying and borrowing assets, managing collateral. It can display the user's Burrow account details, including supplied assets, borrowed amounts, collateral status, and health factor. Additionally, it generates transaction payloads for supplying, borrowing, repaying, withdrawing on NEAR to help users stay informed about their positions.",
                 instructions: `
                 You get supported tokens on Burrow.finance using the /api/tools/get-supported-tokens path. When you get the tokens, display it in a well aesthetic table-like format.
+                You get asset farms on Burrow.finance using the /api/tools/get-asset-farms path. When you get the tokens, display it in a well aesthetic table-like format.
+                You get health factor of user on Burrow.finance using the /api/tools/get-health-factor path, the user's NEAR wallet has to be connected, get the connected user's NEAR account ID (REQUIRED) and pass as parameter.
                 To supply tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/supply-asset path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
                 To borrow tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/borrow-asset path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
                 To withdraw tokens/assets, you must explicitly require the 'token' and 'amount' as compulsory parameters, you must intelligently use the /api/tools/get-supported-tokens path to see if it's a supported token, if it is, get the token_id, pass it as 'token' and multiply the amount by the token decimals and pass as 'amount' (ex. USDC is 6 decimals, so user passing 10 will be 10e6, for most tokens, the decimal is 18) to the /api/tools/withdraw-asset path, you'll get a return value which you explicitly use the generate-transaction tool to generate a transaction for.
@@ -32,6 +34,7 @@ export async function GET() {
                 tools: [
                     { type: "generate-transaction" },
                     { type: "generate-evm-tx" },
+                    { type: "sign-message" },
                 ],
             },
         },
@@ -53,6 +56,32 @@ export async function GET() {
                                                 type: "string",
                                                 description:
                                                     "The list of supported tokens",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "/api/tools/get-asset-farms": {
+                get: {
+                    summary: "get asset farms on burrow",
+                    description: "Respond with a list of asset farms",
+                    operationId: "get-asset-farms",
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            message: {
+                                                type: "string",
+                                                description:
+                                                    "The list of asset farms",
                                             },
                                         },
                                     },
@@ -727,6 +756,43 @@ export async function GET() {
                                             error: {
                                                 type: "string",
                                                 description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            "/api/tools/get-health-factor": {
+                get: {
+                    summary: "get health factor of user",
+                    description: "Respond with user health factor",
+                    operationId: "get-health-factor",
+                    parameters: [
+                        {
+                            name: "accountID",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The connected user's NEAR account ID",
+                        },
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            healthFactor: {
+                                                type: "number",
+                                                description:
+                                                    "The user's health factor",
                                             },
                                         },
                                     },
