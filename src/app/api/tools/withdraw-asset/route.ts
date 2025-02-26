@@ -24,7 +24,7 @@ export async function GET(request: Request) {
                     params: {
                         methodName: preTX.data.method_name,
                         args: preTX.data.args,
-                        gas: 150000000000000,
+                        gas: 300000000000000,
                         deposit: 0,
                     },
                 },
