@@ -4,7 +4,7 @@
 
 The **Burrow Finance Assistant** is your AI-powered co-pilot for navigating and mastering **Burrow Finance** on the **NEAR blockchain**. This assistant simplifies key DeFi operations, providing you with an intuitive way to manage your assets, understand your positions, and generate transactions with ease.
 
-[![Demo](https://img.shields.io/badge/Demo-Visit%20Demo-brightgreen)](https://youtube.com)
+[![Demo](https://img.shields.io/badge/Demo-Visit%20Demo-brightgreen)](https://youtu.be/N_naxok1KEQ?si=VxX-vilMOZEGgTez)
 [![Live URL](https://img.shields.io/badge/Live_URL-Bitte_Registry-red)](https://www.bitte.ai/agents/burrow-finance-assistant.vercel.app?prompt=Hey%2C%20what%20can%20you%20do%20for%20me%3F)
 
 **Tooling:**
