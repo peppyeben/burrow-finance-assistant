@@ -20,7 +20,7 @@ export async function GET() {
             "account-id": ACCOUNT_ID,
             assistant: {
                 name: "Burrow/Rhea Finance Assistant",
-                image: `${BURROW_LIVE_URL}/quinn.png`,
+                image: `${BURROW_LIVE_URL}/rhea.png`,
                 categories: ["DeFi"],
 
                 description:
