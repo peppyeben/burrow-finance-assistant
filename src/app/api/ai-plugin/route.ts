@@ -1,12 +1,14 @@
 import { ACCOUNT_ID, PLUGIN_URL } from "@/app/config";
 import { NextResponse } from "next/server";
 
+const BURROW_LIVE_URL = "https://burrow-finance-assistant.vercel.app/";
+
 export async function GET() {
     const pluginData = {
         openapi: "3.0.0",
         info: {
-            title: "Burrow Finance Assistant",
-            description: "API for the boilerplate",
+            title: "Burrow/Rhea Finance Assistant",
+            description: "Assistant for Burrow/Rhea Finance.",
             version: "1.0.0",
         },
         servers: [
@@ -17,9 +19,12 @@ export async function GET() {
         "x-mb": {
             "account-id": ACCOUNT_ID,
             assistant: {
-                name: "Burrow Finance Assistant",
+                name: "Burrow/Rhea Finance Assistant",
+                image: `${BURROW_LIVE_URL}/quinn.png`,
+                categories: ["DeFi"],
+
                 description:
-                    "An assistant specialized in Burrow Finance, providing key functionalities such as supplying and borrowing assets, managing collateral. It can display the user's Burrow account details, including supplied assets, borrowed amounts, collateral status, and health factor. Additionally, it generates transaction payloads for supplying, borrowing, repaying, withdrawing to help users stay informed about their positions.",
+                    "An assistant specialized in Burrow/Rhea Finance, providing key functionalities such as supplying and borrowing assets, managing collateral. It can display the user's Burrow account details, including supplied assets, borrowed amounts, collateral status, and health factor. Additionally, it generates transaction payloads for supplying, borrowing, repaying, withdrawing to help users stay informed about their positions.",
                 instructions: `
                 Make your responses aesthetically pleasing, be very dynamic, bolden, italicize words, add emojis (format the replies well before response.) etc.
                 Let the user know that they must connect their compatible NEAR wallet.

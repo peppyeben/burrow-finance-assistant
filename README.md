@@ -1,8 +1,8 @@
-# 🚀 Burrow Finance Assistant: Your DeFi Co-pilot on NEAR 🚀
+# 🚀 Burrow/Rhea Finance Assistant: Your DeFi Co-pilot on NEAR 🚀
 
 ## Introduction
 
-The **Burrow Finance Assistant** is your AI-powered co-pilot for navigating and mastering **Burrow Finance** on the **NEAR blockchain**. This assistant simplifies key DeFi operations, providing you with an intuitive way to manage your assets, understand your positions, and generate transactions with ease.
+The **Burrow/Rhea Finance Assistant** is your AI-powered co-pilot for navigating and mastering **Burrow Finance** on the **NEAR blockchain**. This assistant simplifies key DeFi operations, providing you with an intuitive way to manage your assets, understand your positions, and generate transactions with ease.
 
 [![Demo](https://img.shields.io/badge/Demo-Visit%20Demo-brightgreen)](https://youtube.com)
 [![Live URL](https://img.shields.io/badge/Live_URL-Bitte_Registry-red)](https://www.bitte.ai/agents/burrow-finance-assistant.vercel.app?prompt=Hey%2C%20what%20can%20you%20do%20for%20me%3F)
@@ -17,21 +17,21 @@ The **Burrow Finance Assistant** is your AI-powered co-pilot for navigating and 
 
 ## Key Features
 
--   **Account Overview at a Glance:** Instantly see your supplied assets, borrowed amounts, collateral status, and health factor on Burrow Finance.
+-   **Account Overview at a Glance:** Instantly see your supplied assets, borrowed amounts, collateral status, and health factor on Burrow/Rhea Finance.
 -   **Simplified Asset Management:** Generate transaction payloads for supplying, borrowing, repaying, and withdrawing assets directly through the assistant.
 -   **Collateral Management Insights:** Understand your collateral status and health factor to make informed decisions and manage risk effectively.
--   **Stay Informed:** Keep track of your Burrow Finance positions and activities in a user-friendly way.
+-   **Stay Informed:** Keep track of your Burrow/Rhea Finance positions and activities in a user-friendly way.
 
 ## User Flow
 
 1.  **Get Supported Tokens:**
 
-    -   Ask the assistant: "What tokens are supported on Burrow Finance?"
+    -   Ask the assistant: "What tokens are supported on Burrow/Rhea Finance?"
     -   The assistant will display a table of supported tokens.
 
 2.  **Get Asset Farms:**
 
-    -   Ask the assistant: "What are the asset farms on Burrow Finance?"
+    -   Ask the assistant: "What are the asset farms on Burrow/Rhea Finance?"
     -   The assistant will display a table of available asset farms.
 
 3.  **Check Health Factor:**
@@ -71,4 +71,4 @@ The **Burrow Finance Assistant** is your AI-powered co-pilot for navigating and 
 
 ## Conclusion
 
-The **Burrow Finance Assistant** simplifies your interaction with Burrow Finance on NEAR, making DeFi more accessible and manageable. By leveraging AI, this assistant provides a user-friendly interface to navigate the complexities of decentralized lending and borrowing, empowering you to take control of your DeFi positions on NEAR. We welcome feedback and suggestions to further enhance the assistant's functionality and user experience!
+The **Burrow/Rhea Finance Assistant** simplifies your interaction with Burrow/Rhea Finance on NEAR, making DeFi more accessible and manageable. By leveraging AI, this assistant provides a user-friendly interface to navigate the complexities of decentralized lending and borrowing, empowering you to take control of your DeFi positions on NEAR. We welcome feedback and suggestions to further enhance the assistant's functionality and user experience!
